@@ -1,0 +1,10 @@
+# values.yaml
+image:
+  repository: mediawiki
+  tag: latest
+
+mysql:
+  host: mysql
+  username: root
+  password: Welcome@123
+  database: mediawiki

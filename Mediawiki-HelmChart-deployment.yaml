@@ -1,0 +1,55 @@
+# deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "mediawiki.fullname" . }}
+  labels:
+    app.kubernetes.io/name: {{ include "mediawiki.name" . }}
+    helm.sh/chart: {{ include "mediawiki.chart" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ include "mediawiki.name" . }}
+      app.kubernetes.io/instance: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: {{ include "mediawiki.name" . }}
+        app.kubernetes.io/instance: {{ .Release.Name }}
+    spec:
+      containers:
+        - name: {{ .Chart.Name }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          env:
+            - name: MW_INSTALL_PATH
+              value: "/var/www/html"
+            - name: MEDIAWIKI_DB_HOST
+              value: {{ .Values.mysql.host | quote }}
+            - name: MEDIAWIKI_DB_USER
+              value: {{ .Values.mysql.username | quote }}
+            - name: MEDIAWIKI_DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: mediawiki-secrets
+                  key: mysql-root-password
+            - name: MEDIAWIKI_DB_NAME
+              value: {{ .Values.mysql.database | quote }}
+          ports:
+            - name: http
+              containerPort: 80
+              protocol: TCP
+          volumeMounts:
+            - name: mediawiki-config
+              mountPath: /var/www/html/config
+            - name: mediawiki-images
+              mountPath: /var/www/html/images
+      volumes:
+        - name: mediawiki-config
+          persistentVolumeClaim:
+            claimName: {{ include "mediawiki.fullname" . }}
+        - name: mediawiki-images
+          persistentVolumeClaim:
+            claimName: {{ include "mediawiki.fullname" . }}

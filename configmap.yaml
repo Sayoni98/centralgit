@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mediawiki-config
+data:
+  LocalSettings.php: |
+    <?php
+    ## Your MediaWiki configuration here
