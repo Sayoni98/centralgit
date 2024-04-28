@@ -1,2 +1,2 @@
 # centralgit
-Code for shayari
+Deployment of Mediawiki
